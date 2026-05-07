@@ -71,24 +71,34 @@ EOF
 
 ## 3. 烧录命令
 
-使用解析得到的路径执行：
+⚠️ **重要**：UV4.exe 是 GUI 程序，直接 `& UV4.exe ...` 会立即返回 shell 但烧录还在后台进行。**必须使用 `Start-Process -Wait` 同步等待烧录完成**，否则会读到不完整的日志或在芯片还在写入时就报告"成功"。
+
+使用解析得到的路径执行（PowerShell 工具调用时务必把 `timeout` 参数提到 600000，给烧录留 10 分钟上限）：
 
 ```powershell
-& "<uv4_path>" -f "<project_path>" -o "burn_log.txt"
+$proc = Start-Process -FilePath "<uv4_path>" `
+    -ArgumentList @('-f', '<project_path>', '-o', 'burn_log.txt') `
+    -Wait -PassThru -WindowStyle Hidden
+"ExitCode=$($proc.ExitCode)"
 ```
 
 参数说明：
 - `-f`：Flash download 模式（下载到芯片，不启动 IDE）
 - `-o`：输出烧录日志到指定文件
+- `Start-Process -Wait`：阻塞直到 UV4.exe 真正退出（烧录+校验完成）
+- `-PassThru`：返回进程对象，便于读取 `ExitCode`
+- `-WindowStyle Hidden`：不弹出 Keil 窗口
 
-如果用户要求"编译并烧录"，先执行 `-b` 编译，再执行 `-f` 烧录。
+如果用户要求"编译并烧录"，先执行 `-b` 编译（同样用 `Start-Process -Wait`），确认 0 Error 后再执行 `-f` 烧录，两步必须串行不能并行。
+
+如果烧录预计较长，可以在 PowerShell 工具调用时设置 `run_in_background: true`，工具会在烧录结束后通知；后续再读 `burn_log.txt`。
 
 ## 4. 检查结果
 
-烧录完成后读取日志确认结果：
+UV4.exe 退出后再读取日志（此时烧录与校验已完成、日志已写完整）：
 
 ```powershell
-cat "burn_log.txt"
+Get-Content "burn_log.txt"
 ```
 
-目标：**0 Error(s)**，或日志中包含 "Download Complete" / "Verify OK"。
+目标：**0 Error(s)**，或日志中包含 "Download Complete" / "Verify OK"。如果 `ExitCode != 0` 或日志中出现 "Error: Flash Download failed" / "No Algorithm found" / "Cannot Load Flash Programming Algorithm"，需停下来排查（多半是接线、目标芯片型号、调试器配置问题），不要重试覆盖芯片。

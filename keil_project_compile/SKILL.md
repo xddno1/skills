@@ -71,25 +71,43 @@ EOF
 
 ## 3. 编译命令
 
-使用解析得到的路径执行：
+⚠️ **重要**：UV4.exe 是 GUI 程序，直接 `& UV4.exe ...` 会立即返回 shell 但编译还在后台运行。**必须使用 `Start-Process -Wait` 同步等待编译完成**，否则会读到不完整的日志。
+
+使用解析得到的路径执行（PowerShell 工具调用时务必把 `timeout` 参数提到 600000，给编译留 10 分钟上限）：
 
 ```powershell
-& "<uv4_path>" -b "<project_path>" -o "build_log.txt"
+$proc = Start-Process -FilePath "<uv4_path>" `
+    -ArgumentList @('-b', '<project_path>', '-o', 'build_log.txt') `
+    -Wait -PassThru -WindowStyle Hidden
+"ExitCode=$($proc.ExitCode)"
 ```
 
 参数说明：
 - `-b`：build 模式（只编译不启动 IDE）
 - `-o`：输出编译日志到指定文件
+- `Start-Process -Wait`：阻塞直到 UV4.exe 真正退出（编译完成）
+- `-PassThru`：返回进程对象，便于读取 `ExitCode`
+- `-WindowStyle Hidden`：不弹出 Keil 窗口
+
+UV4.exe `-b` 模式退出码：
+- `0`：无警告无错误
+- `1`：有警告
+- `2`：有错误
+- `3`：致命错误（无法启动）
+- `11/12`：编译成功（含警告）
+- `15`：错误，未生成可执行文件
+
+如果编译时间预计较长（大型工程），可以在 PowerShell 工具调用时设置 `run_in_background: true`，工具会在编译结束后通知；后续再读 `build_log.txt`。
 
 ## 4. 检查结果
 
-编译完成后读取日志确认结果：
+UV4.exe 退出后再读取日志（此时日志已写完整）：
 
 ```powershell
-cat "build_log.txt"
+Get-Content "build_log.txt"
 ```
 
-目标：**0 Error(s)**
+目标：**0 Error(s)**。如果 `ExitCode >= 2`，结合日志末尾的 `X Error(s), Y Warning(s)` 行定位问题。
 
 ## 5. 输出文件
 
