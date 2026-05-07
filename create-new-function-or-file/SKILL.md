@@ -1,0 +1,1 @@
+**新建文件和函数署名统一用lichunjiang，非沃莱科技的代码不写Copyright公司行**
