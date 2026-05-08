@@ -5,37 +5,104 @@ description: 打开SecureCRT连接串口、查找日志文件位置。当用户�
 
 # SecureCRT 串口连接与日志定位
 
-直接调用脚本，脚本内部自动完成 SecureCRT.exe 查找、串口打开、日志目录定位、config.ini 读写。
+## 1. CRT 安装位置
 
-## 1. 打开串口
+**优先从工程配置读取**：
 
-```powershell
-powershell -ExecutionPolicy Bypass -File "c:\Users\WLPC\.claude\skills\securecrt-serial-log\securecrt.ps1" -Workspace "<工作目录>" -Action open -Com "<COMx>" -Baud "<波特率>"
+先检查 `.ai-output/config.ini` 中的 `securecrt.path` 字段：
+
+```bash
+cat ".ai-output/config.ini"
 ```
 
-参数说明：
-- `-Workspace`：工程根目录（必填）
-- `-Action open`：打开串口连接
-- `-Com`：串口号，如 `COM9`。可省略，省略时从 `.ai-output/config.ini` 的 `com` 字段读取。
-- `-Baud`：波特率，默认 `115200`。常用 `115200` / `9600`。
+如果工程配置存在，直接用里面的路径；否则按以下方式查找。
 
-脚本会按 config.ini → 注册表 → 常见安装路径（包括 `D:\software\CRT\SecureCRT.exe`）的顺序查找 SecureCRT.exe，并把结果回写到 config.ini。
+系统已安装路径：`D:\software\CRT\SecureCRT.exe`
 
-## 2. 查看最新日志
+如果找不到，用以下命令搜索：
 
-```powershell
-powershell -ExecutionPolicy Bypass -File "c:\Users\WLPC\.claude\skills\securecrt-serial-log\securecrt.ps1" -Workspace "<工作目录>" -Action logs -LogCount 5
+```bash
+where SecureCRT.exe
 ```
 
-参数说明：
-- `-Action logs`：列出日志目录中最近修改的日志
-- `-LogCount`：返回条数，默认 5
+或在注册表中查安装目录：
 
-脚本会按 config.ini → SecureCRT 会话配置 (`Log Filename V2`) → 默认 `D:\log\` 的顺序查找日志目录，输出最近 N 个文件的时间、大小、文件名，并打印最新文件的完整路径。
+```powershell
+reg query "HKLM\SOFTWARE\VanDyke\SecureCRT\Install" /v "Main Directory"
+```
 
-## 3. 退出码
+找到后写入 `.ai-output/config.ini`：
 
-- `0`：成功
-- `97`：找不到日志目录
-- `98`：未指定 COM 口
-- `99`：找不到 SecureCRT.exe
+```bash
+mkdir -p .ai-output
+cat <<EOF >> .ai-output/config.ini
+[securecrt]
+path = <搜索到的路径>
+EOF
+```
+
+## 2. 打开 CRT 连接串口
+
+**优先从工程配置读取**：
+
+先检查 `.ai-output/config.ini` 中的 `securecrt.com` 和 `securecrt.baud` 字段：
+
+```bash
+cat ".ai-output/config.ini"
+```
+
+如果工程配置存在，用里面的值启动；否则用默认值。
+
+命令行启动格式：
+
+```powershell
+& "<securecrt.path>" /SERIAL <com> /BAUD <baud>
+```
+
+常用波特率：115200、9600。
+
+## 3. 日志存储位置
+
+**优先从工程配置读取**：
+
+先检查 `.ai-output/config.ini` 中的 `securecrt.logdir` 字段：
+
+```bash
+cat ".ai-output/config.ini"
+```
+
+如果工程配置存在，直接用里面指定的目录；否则按以下系统配置查找。
+
+系统默认日志目录：`D:\log\`
+
+文件名格式：`Serial-COM9-年月日_时_分_秒.log`
+
+配置文件中定义了自动记录和午夜切分：
+- 配置路径：`D:\WLPC\AppData\Roaming\VanDyke\Config\Sessions\Serial-COM9.ini`
+- 日志路径字段：`S:"Log Filename V2"=D:\log\%S-%Y%M%D_%h_%m_%s.log`
+
+如果以上都找不到，用以下命令搜索配置中的日志路径：
+
+```bash
+grep -ri "Log Filename V2" "D:/WLPC/AppData/Roaming/VanDyke/Config/Sessions/"
+```
+
+或全局搜索：
+
+```bash
+grep -ri "Log Filename V2" "D:/WLPC/AppData/Roaming/VanDyke/Config/"
+```
+
+找到后写入 `.ai-output/config.ini`：
+
+```bash
+cat <<EOF >> .ai-output/config.ini
+logdir = <搜索到的日志目录>
+EOF
+```
+
+## 4. 快速查看最新日志
+
+```powershell
+Get-ChildItem -Path "<securecrt.logdir>" | Sort-Object LastWriteTime -Descending | Select-Object -First 5 Name, LastWriteTime, Length
+```
