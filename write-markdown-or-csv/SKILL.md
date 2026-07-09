@@ -1,16 +1,17 @@
 ---
 name: write-markdown-or-csv
-description: 输出 markdown 或 csv 文件时，统一保存到工程的 .ai-output 目录下。当用户要求生成报告、统计数据、导出表格或整理分析结果时使用此 skill。
+description: 输出 markdown html 或 csv 文件时，统一保存到工程的 .ai-output 目录下。当用户要求生成报告、统计数据、导出表格或整理分析结果时使用此 skill。
 ---
 
-# Markdown / CSV 输出规范
+# Markdown/ html / CSV 输出规范
 
 ## 文件保存位置
 
-所有 markdown 和 csv 文件统一放在工程的 `.ai-output/` 文件夹下。
+所有 markdown 、html 和 csv 文件统一放在工程的 `.ai-output/` 文件夹下。
 
 - Markdown 文件：`.ai-output/*.md`
 - CSV 文件：`.ai-output/*.csv`
+- html文件：`.ai-output/*.html`
 
 ## 勘误与验证
 

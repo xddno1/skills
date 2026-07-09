@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "long-pdf-reader"
+version = "0.1.0"
+description = "Read, search, and precisely locate content in very long PDF documents."
+readme = "README.md"
+license = "MIT"
+authors = [
+    {name = "Your Name", email = "your.email@example.com"},
+]
+keywords = ["pdf", "ocr", "search", "index", "text-extraction", "long-document"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Text Processing :: Indexing",
+    "Topic :: Utilities",
+]
+requires-python = ">=3.8"
+dependencies = [
+    # Core: either pymupdf (recommended) or pypdf (fallback) is required at runtime.
+    # We do not enforce a default to let users choose.
+]
+
+[project.optional-dependencies]
+pymupdf = ["pymupdf>=1.23.0"]
+pypdf = ["pypdf>=3.0.0"]
+ocr = [
+    "pytesseract>=0.3.10",
+    "Pillow>=9.0.0",
+]
+easyocr = ["easyocr>=1.7.0"]
+all = [
+    "pymupdf>=1.23.0",
+    "pytesseract>=0.3.10",
+    "Pillow>=9.0.0",
+    "easyocr>=1.7.0",
+]
+
+[project.scripts]
+lpdf-extract-structure = "long_pdf_reader.extract_structure:main"
+lpdf-build-index = "long_pdf_reader.build_index:main"
+lpdf-search-index = "long_pdf_reader.search_index:main"
+lpdf-extract-pages = "long_pdf_reader.extract_pages:main"
+lpdf-ocr-to-searchable = "long_pdf_reader.ocr_to_searchable_pdf:main"
+lpdf-ocr-info = "long_pdf_reader.ocr_utils:ocr_engine_info_cli"
+
+[project.urls]
+Homepage = "https://github.com/yourusername/long-pdf-reader"
+Issues = "https://github.com/yourusername/long-pdf-reader/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["long_pdf_reader*"]

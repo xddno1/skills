@@ -120,23 +120,71 @@ cat ".ai-output/config.ini"
 
 如果工程配置存在，直接用里面指定的目录；否则按以下系统配置查找。
 
-用以下命令搜索配置中的日志路径：
+### 3.1 查找 SecureCRT 配置目录
 
-```bash
-grep -ri "Log Filename V2" "D:/WLPC/AppData/Roaming/VanDyke/Config/Sessions/"
+SecureCRT 的配置目录位置因安装方式不同而异，按以下优先级查找：
+
+**方式一：从注册表读取（标准安装版）**
+
+```powershell
+reg query "HKCU\SOFTWARE\VanDyke\SecureCRT" /v "Config Path"
 ```
 
-或全局搜索：
+输出示例：
+```
+Config Path    REG_SZ    D:\WLPC\AppData\Roaming\VanDyke\Config
+```
+
+**方式二：默认路径猜测**
+
+如果注册表读取失败，尝试以下常见路径：
+- `C:\Users\<用户名>\AppData\Roaming\VanDyke\Config`
+- `D:\<用户名>\AppData\Roaming\VanDyke\Config`
+
+### 3.2 从会话配置中解析日志路径
+
+在配置目录的 `Sessions` 子目录中，每个会话对应一个 `.ini` 文件（如 `Serial-COM9.ini`、`Default.ini`）。日志路径存储在 `Log Filename V2` 字段中。
+
+**搜索所有会话的日志配置：**
 
 ```bash
-grep -ri "Log Filename V2" "D:/WLPC/AppData/Roaming/VanDyke/Config/"
+grep -ri "Log Filename V2" "<Config目录>/Sessions/"
 ```
+
+**读取特定会话的完整日志配置：**
+
+```bash
+grep -i "Log" "<Config目录>/Sessions/<会话名>.ini"
+```
+
+关键配置项说明：
+
+| 配置项 | 含义 |
+|--------|------|
+| `Log Filename V2` | 日志文件保存路径及命名格式 |
+| `Start Log Upon Connect` | `00000001`=连接时自动记录，`00000000`=手动开始 |
+| `Log Mode` | `00000000`=追加，`00000001`=覆盖 |
+
+**路径中的变量说明：**
+
+日志路径支持变量替换，常见变量：
+- `%S` - 会话名称
+- `%Y` - 年（4位）
+- `%M` - 月
+- `%D` - 日
+- `%h` - 时
+- `%m` - 分
+- `%s` - 秒
+
+例如 `D:\log\%S-%Y%M%D_%h_%m_%s.log` 会生成 `Serial-COM9-20260508_16_11_32.log`
+
+### 3.3 保存到工程配置
 
 找到后写入 `.ai-output/config.ini`：
 
 ```bash
 cat <<EOF >> .ai-output/config.ini
-logdir = <搜索到的日志目录>
+logdir = <日志目录（去掉变量部分）>
 EOF
 ```
 
