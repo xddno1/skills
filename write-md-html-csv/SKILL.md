@@ -1,5 +1,5 @@
 ---
-name: write-markdown-or-csv
+name: write-md-html-csv
 description: 输出 markdown html 或 csv 文件时，统一保存到工程的 .ai-output 目录下。当用户要求生成报告、统计数据、导出表格或整理分析结果时使用此 skill。
 ---
 
@@ -31,3 +31,7 @@ CSV 文件使用 UTF-8 with BOM 编码，确保 Excel 打开时中文不乱码�
 - 使用标准 Markdown 语法
 - 表格对齐，表头与内容分隔清晰
 - 代码块标注语言类型
+
+## HTML注意点
+
+如有生成流程图的需求，请用 `html-mermaid-flowchart` skills, 
