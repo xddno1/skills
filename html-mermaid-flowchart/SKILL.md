@@ -1,28 +1,28 @@
 ---
 name: html-mermaid-flowchart
-description: Guide agents to generate friendly Mermaid program flowcharts inside HTML pages, reports, or artifacts. Use when creating or editing HTML and the content needs a process flow, program logic flow, call path, state/business workflow, conditional branch diagram, or troubleshooting sequence; prefer Mermaid-rendered diagrams over ASCII art, static screenshots, or hand-written SVG unless the user explicitly asks otherwise.
+description: 指导 agent 在 HTML 页面、报告或产物中生成友好的 Mermaid 程序流程图。创建或编辑 HTML 时，如果内容需要展示处理流程、程序逻辑流、调用路径、状态/业务流程、条件分支图或故障排查顺序，就使用此 skill；除非用户明确要求，否则优先使用 Mermaid 渲染图，不要用 ASCII 图、静态截图或手写 SVG。
 ---
 
-# Html Mermaid Flowchart
+# HTML Mermaid 流程图
 
-## Overview
+## 概述
 
-When an HTML output needs a flowchart, embed a Mermaid diagram that renders in the page and is easy to scan. Keep the chart faithful to the source logic, visually calm, and useful for readers who need to understand program behavior quickly.
+当 HTML 输出需要流程图时，嵌入可在页面中渲染的 Mermaid 图。流程图必须忠于源码或文档逻辑，视觉上保持清爽，让读者能快速理解程序行为。
 
-## Workflow
+## 工作流程
 
-1. Identify the flow to show from code, logs, docs, or the user's description.
-2. Choose the smallest diagram type that fits:
-   - Use `flowchart TD` for normal program or business flow.
-   - Use `sequenceDiagram` only when call order between actors/components is the main point.
-   - Use `stateDiagram-v2` only when states and transitions are the main point.
-3. Embed the Mermaid source in the HTML with `<pre class="mermaid">...</pre>` or `<div class="mermaid">...</div>`.
-4. Initialize Mermaid once after the library is loaded.
-5. Verify that the browser renders a diagram, not raw Mermaid text.
+1. 先从代码、日志、文档或用户描述中确认要展示的流程。
+2. 选择最小够用的 Mermaid 图类型：
+   - 普通程序流程或业务流程使用 `flowchart TD`。
+   - 只有组件/角色之间的调用顺序是重点时，才使用 `sequenceDiagram`。
+   - 只有状态和状态迁移是重点时，才使用 `stateDiagram-v2`。
+3. 在 HTML 中用 `<pre class="mermaid">...</pre>` 或 `<div class="mermaid">...</div>` 包住 Mermaid 源码。
+4. Mermaid 库加载后，只初始化一次。
+5. 验证浏览器中显示的是渲染后的图，而不是原始 Mermaid 文本。
 
-## HTML Pattern
+## HTML 写法
 
-For a standalone static HTML file, use the existing project dependency if one exists. Otherwise, include a pinned Mermaid browser bundle and initialize it explicitly:
+如果项目已有 Mermaid 依赖，优先复用项目依赖。独立静态 HTML 文件可以引入固定版本的 Mermaid 浏览器包，并显式初始化：
 
 ```html
 <section class="flow-section">
@@ -54,7 +54,7 @@ flowchart TD
 </script>
 ```
 
-Use CSS to make the diagram readable and responsive:
+使用 CSS 保证流程图可读，并允许小屏幕横向滚动：
 
 ```css
 .flow-section {
@@ -71,24 +71,24 @@ Use CSS to make the diagram readable and responsive:
 }
 ```
 
-## Diagram Rules
+## 流程图规则
 
-- Use ASCII node IDs and concise human labels: `validate{参数有效?}` is good; long code expressions in labels are not.
-- Keep Mermaid delimiters balanced on every node definition. Common valid forms are `node["label"]`, `node{"label"}`, `node(["label"])`, `node[/"label"/]`, and `node[("label")]`.
-- Close quoted decision labels before the closing brace. For example, write `CHRG_CHECK{"IO_CHRG == 0 ?<br/>(充电 IC 正在充电?)"}`, not `CHRG_CHECK{"IO_CHRG == 0 ?<br/>(充电 IC 正在充电?)}`.
-- Do not place raw double quotes inside a quoted node label. Use single quotes, remove the quote marks, or escape them as `&quot;`.
-- Include clear start and end nodes for program flows.
-- Put each meaningful operation in one node; avoid one node per source line.
-- Use decision diamonds for branches and label branch edges with `是` / `否`, `成功` / `失败`, or concrete conditions.
-- Show error, timeout, retry, and fallback paths when they affect behavior.
-- Use `subgraph` to group modules, layers, tasks, or phases when the flow crosses boundaries.
-- Prefer `TD` for procedural flow and `LR` for pipeline or module-to-module flow.
-- Split diagrams that exceed roughly 20 nodes or become visually dense.
-- Do not invent business semantics. If the source material does not prove a branch, label it as inferred or ask the user to confirm before baking it into the diagram.
+- 节点 ID 使用 ASCII，节点标签使用简短的人类可读文字。例如 `validate{参数有效?}` 可以，直接把很长的代码表达式塞进标签里不可以。
+- 每个节点定义里的 Mermaid 定界符必须成对闭合。常见合法写法包括 `node["标签"]`、`node{"标签"}`、`node(["标签"])`、`node[/"标签"/]`、`node[("标签")]`。
+- 判断节点的引号必须在 `}` 前闭合。例如要写 `CHRG_CHECK{"IO_CHRG == 0 ?<br/>(充电 IC 正在充电?)"}`，不要写 `CHRG_CHECK{"IO_CHRG == 0 ?<br/>(充电 IC 正在充电?)}`。
+- 带引号的节点标签内部不要再直接写裸双引号。可以改用单引号、去掉引号，或转义成 `&quot;`。
+- 程序流程必须有清晰的开始节点和结束节点。
+- 一个有意义的操作放一个节点，不要按源码一行一个节点机械展开。
+- 分支判断使用菱形节点，并在边上标注 `是` / `否`、`成功` / `失败`，或明确条件。
+- 错误、超时、重试、兜底路径会影响行为时，必须画出来。
+- 跨模块、跨层级、跨任务或跨阶段时，使用 `subgraph` 分组。
+- 过程型流程优先使用 `TD`，流水线或模块间关系优先使用 `LR`。
+- 图超过约 20 个节点，或视觉上已经拥挤时，拆成多张图。
+- 不要编造业务语义。源码或资料无法证明的分支，要标为“推断”，或先向用户确认后再写进图中。
 
-## Styling Guidance
+## 样式建议
 
-Use subtle styles only when they improve scanning:
+只有在能提升阅读效率时，才使用少量样式：
 
 ```mermaid
 flowchart TD
@@ -108,14 +108,14 @@ flowchart TD
   classDef error fill:#fde8e8,stroke:#c53030,color:#172033;
 ```
 
-Avoid decorative gradients, oversized headings, nested cards, and color-heavy themes in program-analysis HTML reports. The diagram should support the explanation, not dominate it.
+程序分析类 HTML 报告不要使用装饰性渐变、过大的标题、卡片套卡片或颜色过重的主题。流程图应当服务于解释，不要喧宾夺主。
 
-## Validation Checklist
+## 验收检查
 
-- Open the HTML in a browser or run the app page when practical.
-- Confirm Mermaid renders an SVG diagram instead of showing raw Mermaid syntax.
-- Inspect the Mermaid source before rendering: every line containing `["`, `{"`, or `(["` must have a matching closing quote and bracket/brace on the same logical node definition.
-- When extracting Mermaid blocks for validation, select elements with the exact `mermaid` class token. Do not treat wrapper classes such as `mermaid-wrap` as diagram source.
-- Check desktop and mobile widths for horizontal overflow, clipped labels, and unreadable nodes.
-- Confirm the diagram matches the actual code or documented flow.
-- If the HTML is meant to be shared offline, note that the CDN dependency requires network access or replace it with a local Mermaid bundle.
+- 可行时，用浏览器打开 HTML，或运行对应页面。
+- 确认 Mermaid 渲染出了 SVG 图，而不是直接显示 Mermaid 源码。
+- 渲染前检查 Mermaid 源码：每一行只要包含 `["`、`{"` 或 `(["`，同一条逻辑节点定义里就必须有匹配的闭合引号和括号/大括号。
+- 提取 Mermaid 块做校验时，只选择 class 精确包含 `mermaid` 的元素。不要把 `mermaid-wrap` 这类外层容器当成图源码。
+- 检查桌面和移动端宽度下是否有标签截断、节点不可读或布局异常。
+- 确认流程图和实际代码/文档流程一致。
+- 如果 HTML 要离线分享，需要说明 CDN 依赖需要网络，或改成本地 Mermaid 包。

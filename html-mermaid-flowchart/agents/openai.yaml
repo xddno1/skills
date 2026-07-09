@@ -1,4 +1,0 @@
-interface:
-  display_name: "HTML Mermaid Flowchart"
-  short_description: "Guide HTML outputs to render clear Mermaid program flowcharts."
-  default_prompt: "Use $html-mermaid-flowchart to create an HTML report with a clear Mermaid program flowchart."
