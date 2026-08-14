@@ -10,7 +10,7 @@ description: 烧录（下载）当前Keil工程到目标芯片。当用户要求
 ## 仅烧录（默认）
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File "c:\Users\WLPC\.agents\skills\keil_project_burn\keil_burn.ps1" -Workspace "<工作目录>"
+powershell -ExecutionPolicy Bypass -File "C:\Users\WLPC\.codebuddy\skills\keil_project_burn\keil_burn.ps1" -Workspace "<工作目录>"
 ```
 
 ## 编译并烧录
@@ -18,7 +18,7 @@ powershell -ExecutionPolicy Bypass -File "c:\Users\WLPC\.agents\skills\keil_proj
 用户要求"编译并烧录"时，加 `-BuildFirst` 开关。脚本会先编译，确认 0 Error 后再烧录；若编译失败则自动中止。
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File "c:\Users\WLPC\.agents\skills\keil_project_burn\keil_burn.ps1" -Workspace "<工作目录>" -BuildFirst
+powershell -ExecutionPolicy Bypass -File "C:\Users\WLPC\.codebuddy\skills\keil_project_burn\keil_burn.ps1" -Workspace "<工作目录>" -BuildFirst
 ```
 
 ## 参数说明
