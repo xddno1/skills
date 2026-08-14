@@ -8,7 +8,7 @@ description: 编译当前Keil工程。当用户要求编译、build、make或验
 直接调用编译脚本，脚本内部自动完成 UV4.exe 查找、工程文件查找、config.ini 读写、编译执行、结果检查。
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File "c:\Users\WLPC\.claude\skills\keil_project_compile\keil_compile.ps1" -Workspace "<工作目录>"
+powershell -ExecutionPolicy Bypass -File "c:\Users\WLPC\.agents\skills\keil_project_compile\keil_compile.ps1" -Workspace "<工作目录>"
 ```
 
 timeout 设置为 600000（10 分钟）。脚本退出码即为 UV4.exe 退出码：
